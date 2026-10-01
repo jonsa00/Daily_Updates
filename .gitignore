@@ -1,0 +1,8 @@
+# Generated / runtime state (GitHub Actions rebuilds these)
+site/
+cache.json
+images.json
+dashboard.html
+refresh.log
+.DS_Store
+__pycache__/

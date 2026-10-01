@@ -1,0 +1,53 @@
+{
+  "max_items_per_source": 8,
+  "max_age_hours": 48,
+  "sections": [
+    {
+      "id": "tech",
+      "title": "Technology",
+      "sources": [
+        {"name": "Ars Technica", "url": "https://feeds.arstechnica.com/arstechnica/index", "kind": "mainstream"},
+        {"name": "The Verge", "url": "https://www.theverge.com/rss/index.xml", "kind": "mainstream"},
+        {"name": "TechCrunch", "url": "https://techcrunch.com/feed/", "kind": "mainstream"},
+        {"name": "MIT Technology Review", "url": "https://www.technologyreview.com/feed/", "kind": "mainstream"},
+        {"name": "Wired", "url": "https://www.wired.com/feed/rss", "kind": "mainstream"},
+        {"name": "404 Media", "url": "https://www.404media.co/rss/", "kind": "independent"},
+        {"name": "Rest of World", "url": "https://restofworld.org/feed/latest", "kind": "independent"},
+        {"name": "Hacker News", "url": "https://hnrss.org/frontpage", "kind": "independent"}
+      ]
+    },
+    {
+      "id": "world",
+      "title": "World",
+      "sources": [
+        {"name": "BBC World", "url": "https://feeds.bbci.co.uk/news/world/rss.xml", "kind": "mainstream"},
+        {"name": "The Guardian", "url": "https://www.theguardian.com/world/rss", "kind": "mainstream"},
+        {"name": "Al Jazeera", "url": "https://www.aljazeera.com/xml/rss/all.xml", "kind": "mainstream"},
+        {"name": "NPR World", "url": "https://feeds.npr.org/1004/rss.xml", "kind": "mainstream"},
+        {"name": "CBC World", "url": "https://www.cbc.ca/webfeed/rss/rss-world", "kind": "mainstream"},
+        {"name": "France 24", "url": "https://www.france24.com/en/rss", "kind": "mainstream"},
+        {"name": "DW", "url": "https://rss.dw.com/rdf/rss-en-world", "kind": "mainstream"},
+        {"name": "Democracy Now!", "url": "https://www.democracynow.org/democracynow.rss", "kind": "independent"},
+        {"name": "The Intercept", "url": "https://theintercept.com/feed/?rss", "kind": "independent"},
+        {"name": "Le Monde (FR)", "url": "https://www.lemonde.fr/international/rss_full.xml", "kind": "mainstream"}
+      ]
+    },
+    {
+      "id": "montreal",
+      "title": "Montréal",
+      "sources": [
+        {"name": "CBC Montreal", "url": "https://www.cbc.ca/webfeed/rss/rss-canada-montreal", "kind": "mainstream"},
+        {"name": "CityNews Montreal", "url": "https://montreal.citynews.ca/feed/", "kind": "mainstream"},
+        {"name": "Global News Montreal", "url": "https://globalnews.ca/montreal/feed/", "kind": "mainstream"},
+        {"name": "La Presse", "url": "https://www.lapresse.ca/actualites/grand-montreal/rss", "kind": "mainstream"},
+        {"name": "Le Devoir", "url": "https://www.ledevoir.com/rss/manchettes.xml", "kind": "mainstream"},
+        {"name": "Radio-Canada Grand Montréal", "url": "https://ici.radio-canada.ca/rss/4201", "kind": "mainstream"},
+        {"name": "Journal de Montréal", "url": "https://www.journaldemontreal.com/rss.xml", "kind": "mainstream"},
+        {"name": "MTL Blog", "url": "https://www.mtlblog.com/feeds/feed.rss", "kind": "independent"},
+        {"name": "Cult MTL", "url": "https://cultmtl.com/feed/", "kind": "independent"},
+        {"name": "The Rover", "url": "https://therover.ca/feed/", "kind": "independent"},
+        {"name": "Pivot", "url": "https://pivot.quebec/feed/", "kind": "independent"}
+      ]
+    }
+  ]
+}
