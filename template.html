@@ -246,7 +246,7 @@ function render() {
 }
 
 document.getElementById("stamp").textContent =
-  "Updated " + fmt(DATA.generated) + " · refreshes hourly";
+  "Updated " + fmt(DATA.generated) + " · refreshes every 30 minutes";
 const bad = DATA.health.filter(h => !h.status.startsWith("ok"));
 document.getElementById("foot").innerHTML = `<details><summary>Feed status: ${DATA.health.length - bad.length}/${DATA.health.length} live${bad.length ? `, ${bad.length} using cache or failed` : ""}</summary>
   <table>${DATA.health.map(h => `<tr><td>${esc(h.section)}</td><td>${esc(h.source)}</td><td>${h.count}</td>
