@@ -117,7 +117,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
 };
 const state = { q: "", kind: "all", hours: 48, tab: store.get("du.tab", DATA.sections[0].id),
-                pick: new Set(store.get("du.pick", [])), read: new Set(store.get("du.read", [])) };
+                pick: new Set(store.get("du.pick2", [])), read: new Set(store.get("du.read", [])) };
 const lastVisit = store.get("du.lastVisit", null);
 store.set("du.lastVisit", DATA.generated);
 
@@ -145,14 +145,14 @@ const fmt = iso => new Date(iso).toLocaleString([], { weekday: "short", hour: "2
 function render() {
   const cutoff = Date.now() - state.hours * 3600e3, q = state.q.toLowerCase();
   document.getElementById("main").innerHTML = DATA.sections.map(sec => {
-    const picked = sec.sources.filter(s => state.pick.has(s));
+    const key = s => sec.id + "|" + s, picked = sec.sources.filter(s => state.pick.has(key(s)));
     const list = sec.articles.filter(a =>
-      (!picked.length || state.pick.has(a.source)) &&
+      (!picked.length || state.pick.has(key(a.source))) &&
       (state.kind === "all" || a.kind === state.kind) &&
       (!a.date || new Date(a.date) >= cutoff) &&
       (!q || (a.title + " " + a.summary + " " + a.source).toLowerCase().includes(q)));
     const chips = `<span class="chip ${picked.length ? "" : "on"}" data-all="${sec.id}">All</span>` + sec.sources.map(s =>
-      `<span class="chip ${state.pick.has(s) ? "on" : ""}" data-src="${esc(s)}">${esc(s)}</span>`).join("");
+      `<span class="chip ${state.pick.has(key(s)) ? "on" : ""}" data-src="${esc(key(s))}">${esc(s)}</span>`).join("");
     // Lead with a story that has a picture, if one is near the top.
     const lead = list.slice(0, 3).findIndex(a => a.image);
     if (lead > 0) list.unshift(...list.splice(lead, 1));
@@ -199,9 +199,9 @@ for (const id of ["kind", "win", "tabs"]) {
 document.getElementById("main").addEventListener("click", e => {
   const c = e.target.closest(".chip");
   if (c) {
-    if (c.dataset.all) DATA.sections.find(x => x.id === c.dataset.all).sources.forEach(s => state.pick.delete(s));
+    if (c.dataset.all) DATA.sections.find(x => x.id === c.dataset.all).sources.forEach(s => state.pick.delete(c.dataset.all + "|" + s));
     else { const s = c.dataset.src; state.pick.has(s) ? state.pick.delete(s) : state.pick.add(s); }
-    store.set("du.pick", [...state.pick]); render(); return;
+    store.set("du.pick2", [...state.pick]); render(); return;
   }
   const a = e.target.closest("a.t, a.thumb");
   if (a) { state.read.add(a.getAttribute("href")); store.set("du.read", [...state.read].slice(-1000));

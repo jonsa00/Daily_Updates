@@ -11,6 +11,9 @@
         {"name": "TechCrunch", "url": "https://techcrunch.com/feed/", "kind": "mainstream"},
         {"name": "MIT Technology Review", "url": "https://www.technologyreview.com/feed/", "kind": "mainstream"},
         {"name": "Wired", "url": "https://www.wired.com/feed/rss", "kind": "mainstream"},
+        {"name": "Bloomberg", "url": "https://feeds.bloomberg.com/technology/news.rss", "kind": "mainstream"},
+        {"name": "The Economist", "url": "https://www.economist.com/science-and-technology/rss.xml", "kind": "mainstream"},
+        {"name": "Globe and Mail", "url": "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/business/technology/", "kind": "mainstream"},
         {"name": "404 Media", "url": "https://www.404media.co/rss/", "kind": "independent"},
         {"name": "Rest of World", "url": "https://restofworld.org/feed/latest", "kind": "independent"},
         {"name": "Hacker News", "url": "https://hnrss.org/frontpage", "kind": "independent"}
@@ -29,7 +32,10 @@
         {"name": "DW", "url": "https://rss.dw.com/rdf/rss-en-world", "kind": "mainstream"},
         {"name": "Democracy Now!", "url": "https://www.democracynow.org/democracynow.rss", "kind": "independent"},
         {"name": "The Intercept", "url": "https://theintercept.com/feed/?rss", "kind": "independent"},
-        {"name": "Le Monde (FR)", "url": "https://www.lemonde.fr/international/rss_full.xml", "kind": "mainstream"}
+        {"name": "Le Monde (FR)", "url": "https://www.lemonde.fr/international/rss_full.xml", "kind": "mainstream"},
+        {"name": "Bloomberg", "url": "https://feeds.bloomberg.com/politics/news.rss", "kind": "mainstream"},
+        {"name": "The Economist", "url": "https://www.economist.com/latest/rss.xml", "kind": "mainstream"},
+        {"name": "Globe and Mail", "url": "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/world/", "kind": "mainstream"}
       ]
     },
     {
