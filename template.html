@@ -93,6 +93,8 @@ section.wide { grid-column: 1 / -1; }
 .tile svg { width: 100%; height: 26px; display: block; margin-top: 2px; }
 .tile .w { font-size: 10.5px; color: var(--muted); display: flex; justify-content: space-between; gap: 4px; white-space: nowrap; }
 .tile.stale { opacity: .6; }
+ol[dir=rtl] .t, ol[dir=rtl] .s { font-family: "Geeza Pro", "Noto Naskh Arabic", "Segoe UI", Tahoma, sans-serif; line-height: 1.55; }
+ol[dir=rtl] .src { direction: ltr; justify-content: flex-end; }
 section.wide ol { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
 .more { display: block; width: calc(100% - 32px); margin: 4px 16px 14px; padding: 8px; border: 1px solid var(--line);
         border-radius: 8px; background: var(--panel); color: var(--ink); font: inherit; font-size: 13px; cursor: pointer; }
@@ -139,7 +141,7 @@ const store = {
   get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
 };
-const state = { q: "", kind: "all", hours: 48, more: false, tab: store.get("du.tab", DATA.sections[0].id),
+const state = { q: "", kind: "all", hours: 48, more: new Set(), tab: store.get("du.tab", DATA.sections[0].id),
                 pick: new Set(store.get("du.pick2", [])), read: new Set(store.get("du.read", [])) };
 const lastVisit = store.get("du.lastVisit", null);
 store.set("du.lastVisit", DATA.generated);
@@ -217,7 +219,7 @@ function render() {
     // Lead with a story that has a picture, if one is near the top.
     const lead = list.slice(0, 3).findIndex(a => a.image);
     if (!wide && lead > 0) list.unshift(...list.splice(lead, 1));
-    const shown = wide && !state.more ? list.slice(0, WIDE_LIMIT) : list;
+    const open = state.more.has(sec.id), shown = wide && !open ? list.slice(0, WIDE_LIMIT) : list;
     const items = shown.map((a, n) => {
       const isNew = lastVisit && a.date && a.date > lastVisit;
       const pic = a.image ? `<img src="${esc(a.image)}" alt="" loading="lazy" referrerpolicy="no-referrer"
@@ -232,15 +234,15 @@ function render() {
       </div></li>`;
     }).join("");
     const more = wide && list.length > WIDE_LIMIT
-      ? `<button class="more">${state.more ? "Show fewer stories" : `Show all ${list.length} stories`}</button>` : "";
+      ? `<button class="more" data-sec="${sec.id}">${open ? "Show fewer stories" : `Show all ${list.length} stories`}</button>` : "";
     return `<section id="sec-${sec.id}" class="${state.tab === sec.id ? "active" : ""} ${wide ? "wide" : ""}">
       <h2>${esc(sec.title)} <small>${list.length} stories</small></h2>
-      ${wide ? board() : ""}
+      ${sec.board ? board() : ""}
       <div class="chips">${chips}</div>
-      <ol>${items || '<div class="empty">Nothing matches.</div>'}</ol>${more}</section>`;
+      <ol${sec.dir ? ` dir="${sec.dir}" lang="ar"` : ""}>${items || '<div class="empty">Nothing matches.</div>'}</ol>${more}</section>`;
   }).join("");
   document.getElementById("tabs").innerHTML = DATA.sections.map(s =>
-    `<button data-v="${s.id}" class="${state.tab === s.id ? "on" : ""}">${esc(s.title)}</button>`).join("");
+    `<button data-v="${s.id}" class="${state.tab === s.id ? "on" : ""}">${esc(s.title.split(" · ")[0])}</button>`).join("");
 }
 
 document.getElementById("stamp").textContent =
@@ -262,7 +264,8 @@ for (const id of ["kind", "win", "tabs"]) {
   });
 }
 document.getElementById("main").addEventListener("click", e => {
-  if (e.target.closest(".more")) { state.more = !state.more; render(); return; }
+  const m = e.target.closest(".more");
+  if (m) { const id = m.dataset.sec; state.more.has(id) ? state.more.delete(id) : state.more.add(id); render(); return; }
   const c = e.target.closest(".chip");
   if (c) {
     if (c.dataset.all) DATA.sections.find(x => x.id === c.dataset.all).sources.forEach(s => state.pick.delete(c.dataset.all + "|" + s));

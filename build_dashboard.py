@@ -299,7 +299,7 @@ def build():
                     "source": src["name"], "kind": src.get("kind", "mainstream"),
                 })
         articles.sort(key=lambda a: a["date"] or "", reverse=True)
-        sections.append({"id": sec["id"], "title": sec["title"], "layout": sec.get("layout"), "sources": [s["name"] for s in sec["sources"]], "articles": articles})
+        sections.append({"id": sec["id"], "title": sec["title"], "layout": sec.get("layout"), "dir": sec.get("dir"), "board": sec.get("board", False), "sources": [s["name"] for s in sec["sources"]], "articles": articles})
 
     CACHE.write_text(json.dumps(new_cache))
     data = {"generated": datetime.now(timezone.utc).isoformat(), "sections": sections, "markets": markets,

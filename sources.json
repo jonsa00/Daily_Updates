@@ -6,6 +6,7 @@
       "id": "markets",
       "title": "Markets",
       "layout": "wide",
+      "board": true,
       "sources": [
         {"name": "Bloomberg Markets", "url": "https://feeds.bloomberg.com/markets/news.rss", "kind": "mainstream"},
         {"name": "WSJ Markets", "url": "https://feeds.content.dowjones.io/public/rss/RSSMarketsMain", "kind": "mainstream"},
@@ -75,6 +76,28 @@
         {"name": "Cult MTL", "url": "https://cultmtl.com/feed/", "kind": "independent"},
         {"name": "The Rover", "url": "https://therover.ca/feed/", "kind": "independent"},
         {"name": "Pivot", "url": "https://pivot.quebec/feed/", "kind": "independent"}
+      ]
+    },
+    {
+      "id": "arabic",
+      "title": "Arabic · عربي",
+      "layout": "wide",
+      "dir": "rtl",
+      "sources": [
+        {"name": "Al Jazeera", "url": "https://www.aljazeera.net/aljazeerarss/a7c186be-1baa-4bd4-9d80-a84db769f779/73d0e1b4-532f-45ef-b135-bfdff8b8cab9", "kind": "mainstream"},
+        {"name": "BBC Arabic", "url": "https://feeds.bbci.co.uk/arabic/rss.xml", "kind": "mainstream"},
+        {"name": "France 24 Arabic", "url": "https://www.france24.com/ar/rss", "kind": "mainstream"},
+        {"name": "DW Arabic", "url": "https://rss.dw.com/rdf/rss-ar-all", "kind": "mainstream"},
+        {"name": "Sky News Arabia", "url": "https://www.skynewsarabia.com/rss", "kind": "mainstream"},
+        {"name": "CNN Arabic", "url": "https://arabic.cnn.com/api/v1/rss/rss.xml", "kind": "mainstream"},
+        {"name": "Asharq Al-Awsat", "url": "https://aawsat.com/feed", "kind": "mainstream"},
+        {"name": "An-Nahar", "url": "https://www.annahar.com/rss", "kind": "mainstream"},
+        {"name": "UN News", "url": "https://news.un.org/feed/subscribe/ar/news/all/rss.xml", "kind": "mainstream"},
+        {"name": "Al-Quds Al-Arabi", "url": "https://www.alquds.co.uk/feed/", "kind": "independent"},
+        {"name": "Mada Masr", "url": "https://www.madamasr.com/ar/feed/", "kind": "independent"},
+        {"name": "Enab Baladi", "url": "https://www.enabbaladi.net/feed", "kind": "independent"},
+        {"name": "7iber", "url": "https://www.7iber.com/feed/", "kind": "independent"},
+        {"name": "Daraj", "url": "https://daraj.media/feed/", "kind": "independent"}
       ]
     }
   ],
