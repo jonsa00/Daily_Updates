@@ -94,8 +94,10 @@
         {"name": "An-Nahar", "url": "https://www.annahar.com/rss", "kind": "mainstream"},
         {"name": "UN News", "url": "https://news.un.org/feed/subscribe/ar/news/all/rss.xml", "kind": "mainstream"},
         {"name": "Al-Quds Al-Arabi", "url": "https://www.alquds.co.uk/feed/", "kind": "independent"},
-        {"name": "Mada Masr", "url": "https://www.madamasr.com/ar/feed/", "kind": "independent"},
-        {"name": "Enab Baladi", "url": "https://www.enabbaladi.net/feed", "kind": "independent"},
+        {"name": "Mada Masr", "url": "https://www.madamasr.com/ar/feed/", "kind": "independent",
+         "fallback_url": "https://news.google.com/rss/search?q=site:madamasr.com+when:2d&hl=ar&gl=EG&ceid=EG:ar"},
+        {"name": "Enab Baladi", "url": "https://www.enabbaladi.net/feed", "kind": "independent",
+         "fallback_url": "https://news.google.com/rss/search?q=site:enabbaladi.net+when:2d&hl=ar&gl=SY&ceid=SY:ar"},
         {"name": "7iber", "url": "https://www.7iber.com/feed/", "kind": "independent"},
         {"name": "Daraj", "url": "https://daraj.media/feed/", "kind": "independent"}
       ]

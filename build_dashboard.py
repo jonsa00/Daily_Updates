@@ -164,8 +164,17 @@ def load_source(src, cfg, cache):
     now = datetime.now(timezone.utc)
     cutoff = now - timedelta(hours=cfg.get("max_age_hours", 48))
     try:
-        items = parse_feed(fetch(src["url"]))
-        status = "ok"
+        try:
+            items = parse_feed(fetch(src["url"]))
+            status = "ok"
+        except Exception:
+            if not src.get("fallback_url"):
+                raise
+            # e.g. a Google News query for a site that blocks GitHub's servers
+            items = parse_feed(fetch(src["fallback_url"]))
+            for i in items:  # Google News appends " - Outlet" to titles
+                i["title"] = re.sub(r"\s+-\s+[^-]{1,40}$", "", i["title"])
+            status = "ok (fallback feed)"
     except Exception as e:  # network, HTTP, or XML error: use last good copy
         cached = cache.get(src["url"], [])
         items = [dict(i, date=parse_date(i["date"])) for i in cached]
@@ -283,7 +292,7 @@ def build():
         for src in sec["sources"]:
             _, items, status = results[(sec["id"], src["url"])]
             report.append((sec["title"], src["name"], status, len(items)))
-            if status == "ok":
+            if status.startswith("ok"):
                 new_cache[src["url"]] = [dict(i, date=i["date"].isoformat() if i["date"] else None) for i in items]
             elif src["url"] in cache:
                 new_cache[src["url"]] = cache[src["url"]]
