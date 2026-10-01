@@ -3,6 +3,28 @@
   "max_age_hours": 48,
   "sections": [
     {
+      "id": "markets",
+      "title": "Markets",
+      "layout": "wide",
+      "sources": [
+        {"name": "Bloomberg Markets", "url": "https://feeds.bloomberg.com/markets/news.rss", "kind": "mainstream"},
+        {"name": "WSJ Markets", "url": "https://feeds.content.dowjones.io/public/rss/RSSMarketsMain", "kind": "mainstream"},
+        {"name": "Financial Times", "url": "https://www.ft.com/markets?format=rss", "kind": "mainstream"},
+        {"name": "FT Alphaville", "url": "https://www.ft.com/alphaville?format=rss", "kind": "mainstream"},
+        {"name": "CNBC", "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000664", "kind": "mainstream"},
+        {"name": "The Economist", "url": "https://www.economist.com/finance-and-economics/rss.xml", "kind": "mainstream"},
+        {"name": "Globe and Mail", "url": "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/investing/", "kind": "mainstream"},
+        {"name": "BNN Bloomberg", "url": "https://www.bnnbloomberg.ca/arc/outboundfeeds/rss/category/markets/", "kind": "mainstream"},
+        {"name": "CBC Business", "url": "https://www.cbc.ca/webfeed/rss/rss-business", "kind": "mainstream"},
+        {"name": "La Presse Affaires", "url": "https://www.lapresse.ca/affaires/rss", "kind": "mainstream"},
+        {"name": "Investing.com", "url": "https://www.investing.com/rss/news_25.rss", "kind": "mainstream"},
+        {"name": "Wolf Street", "url": "https://wolfstreet.com/feed/", "kind": "independent"},
+        {"name": "Naked Capitalism", "url": "https://www.nakedcapitalism.com/feed", "kind": "independent"},
+        {"name": "The Big Picture", "url": "https://ritholtz.com/feed/", "kind": "independent"},
+        {"name": "Abnormal Returns", "url": "https://abnormalreturns.com/feed/", "kind": "independent"}
+      ]
+    },
+    {
       "id": "tech",
       "title": "Technology",
       "sources": [
@@ -53,6 +75,58 @@
         {"name": "Cult MTL", "url": "https://cultmtl.com/feed/", "kind": "independent"},
         {"name": "The Rover", "url": "https://therover.ca/feed/", "kind": "independent"},
         {"name": "Pivot", "url": "https://pivot.quebec/feed/", "kind": "independent"}
+      ]
+    }
+  ],
+  "indicators": [
+    {
+      "group": "Americas",
+      "items": [
+        {"name": "S&P 500", "symbol": "^GSPC"},
+        {"name": "Dow Jones", "symbol": "^DJI"},
+        {"name": "Nasdaq", "symbol": "^IXIC"},
+        {"name": "Russell 2000", "symbol": "^RUT"},
+        {"name": "S&P/TSX", "symbol": "^GSPTSE"},
+        {"name": "VIX", "symbol": "^VIX"}
+      ]
+    },
+    {
+      "group": "Europe & Asia",
+      "items": [
+        {"name": "FTSE 100", "symbol": "^FTSE"},
+        {"name": "DAX", "symbol": "^GDAXI"},
+        {"name": "CAC 40", "symbol": "^FCHI"},
+        {"name": "Euro Stoxx 50", "symbol": "^STOXX50E"},
+        {"name": "Nikkei 225", "symbol": "^N225"},
+        {"name": "Hang Seng", "symbol": "^HSI"},
+        {"name": "Shanghai", "symbol": "000001.SS"}
+      ]
+    },
+    {
+      "group": "Commodities",
+      "items": [
+        {"name": "WTI crude", "symbol": "CL=F"},
+        {"name": "Brent crude", "symbol": "BZ=F"},
+        {"name": "Natural gas", "symbol": "NG=F"},
+        {"name": "Gold", "symbol": "GC=F"},
+        {"name": "Silver", "symbol": "SI=F"},
+        {"name": "Copper", "symbol": "HG=F"},
+        {"name": "Wheat", "symbol": "ZW=F"},
+        {"name": "Corn", "symbol": "ZC=F"}
+      ]
+    },
+    {
+      "group": "Rates, FX & crypto",
+      "items": [
+        {"name": "US 5Y yield", "symbol": "^FVX", "unit": "%"},
+        {"name": "US 10Y yield", "symbol": "^TNX", "unit": "%"},
+        {"name": "US 30Y yield", "symbol": "^TYX", "unit": "%"},
+        {"name": "US dollar index", "symbol": "DX-Y.NYB"},
+        {"name": "USD/CAD", "symbol": "CAD=X"},
+        {"name": "EUR/USD", "symbol": "EURUSD=X"},
+        {"name": "USD/JPY", "symbol": "JPY=X"},
+        {"name": "Bitcoin", "symbol": "BTC-USD"},
+        {"name": "Ether", "symbol": "ETH-USD"}
       ]
     }
   ]

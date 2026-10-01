@@ -14,6 +14,7 @@ import ssl
 import subprocess
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
@@ -169,9 +170,72 @@ def load_source(src, cfg, cache):
         cached = cache.get(src["url"], [])
         items = [dict(i, date=parse_date(i["date"])) for i in cached]
         status = "cached: %s" % type(e).__name__ if cached else "failed: %s" % e
+    for i in items:
+        # Some feeds label local times as UTC, which puts stories in the future; shift back whole hours.
+        if i["date"] and i["date"] > now + timedelta(minutes=10):
+            i["date"] -= timedelta(hours=-(-(i["date"] - now).total_seconds() // 3600))
     fresh = [i for i in items if i["date"] is None or i["date"] >= cutoff]
     fresh.sort(key=lambda i: i["date"] or now, reverse=True)
     return src, fresh[: cfg.get("max_items_per_source", 8)], status
+
+
+def fetch_quote(ind):
+    """Latest price, day change and 1-month daily closes for one symbol (Yahoo Finance chart API)."""
+    sym = urllib.parse.quote(ind["symbol"])
+    last_err = None
+    for host in ("query1", "query2"):
+        try:
+            raw = fetch("https://%s.finance.yahoo.com/v8/finance/chart/%s?range=1mo&interval=1d" % (host, sym))
+            res = json.loads(raw)["chart"]["result"][0]
+            break
+        except Exception as e:
+            last_err = e
+    else:
+        raise last_err
+    meta = res["meta"]
+    bars = [(t, c) for t, c in zip(res.get("timestamp", []), res["indicators"]["quote"][0]["close"]) if c is not None]
+    price, at = meta["regularMarketPrice"], meta.get("regularMarketTime")
+    off = meta.get("gmtoffset", 0)
+    day = lambda ts: (ts + off) // 86400
+    # The last daily bar is today's session when it shares the quote's local date.
+    if bars and at and day(bars[-1][0]) == day(at):
+        bars[-1] = (bars[-1][0], price)
+        prev = bars[-2][1] if len(bars) > 1 else None
+    else:
+        prev = bars[-1][1] if bars else None
+        bars.append((at, price))
+    closes = [c for _, c in bars]
+    return {
+        "name": ind["name"], "symbol": ind["symbol"], "unit": ind.get("unit", ""),
+        "currency": meta.get("currency"), "price": price, "prev": prev,
+        "change": price - prev if prev else None,
+        "pct": (price / prev - 1) * 100 if prev else None,
+        "month_pct": (price / closes[0] - 1) * 100 if closes and closes[0] else None,
+        "time": datetime.fromtimestamp(at, timezone.utc).isoformat() if at else None,
+        "spark": [round(c, 4) for c in closes],
+    }
+
+
+def load_markets(cfg, cache):
+    """Quotes grouped as in sources.json; a symbol that fails keeps its last good quote, marked stale."""
+    inds = [i for g in cfg.get("indicators", []) for i in g["items"]]
+    quotes, report = {}, []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=12) as pool:
+        futs = {pool.submit(fetch_quote, i): i for i in inds}
+        for f in concurrent.futures.as_completed(futs):
+            ind = futs[f]
+            try:
+                quotes[ind["symbol"]] = f.result()
+                status = "ok"
+            except Exception as e:
+                old = cache.get("quote:" + ind["symbol"])
+                if old:
+                    quotes[ind["symbol"]] = dict(old, stale=True)
+                status = ("cached: " if old else "failed: ") + type(e).__name__
+            report.append(("Indicators", ind["name"], status, 1 if ind["symbol"] in quotes else 0))
+    groups = [{"group": g["group"], "items": [quotes[i["symbol"]] for i in g["items"] if i["symbol"] in quotes]}
+              for g in cfg.get("indicators", [])]
+    return groups, quotes, report
 
 
 def build():
@@ -209,7 +273,11 @@ def build():
             i["image"] = i["image"] or images.get(i["link"]) or None
     IMAGE_CACHE.write_text(json.dumps({k: v for k, v in images.items() if k in live}))
 
-    new_cache, report, sections = {}, [], []
+    markets, quotes, report = load_markets(cfg, cache)
+    new_cache, sections = {"quote:" + k: v for k, v in quotes.items() if not v.get("stale")}, []
+    for k, v in cache.items():  # keep last good quotes for symbols that failed this run
+        if k.startswith("quote:") and k not in new_cache:
+            new_cache[k] = v
     for sec in cfg["sections"]:
         seen, articles = set(), []
         for src in sec["sources"]:
@@ -231,10 +299,10 @@ def build():
                     "source": src["name"], "kind": src.get("kind", "mainstream"),
                 })
         articles.sort(key=lambda a: a["date"] or "", reverse=True)
-        sections.append({"id": sec["id"], "title": sec["title"], "sources": [s["name"] for s in sec["sources"]], "articles": articles})
+        sections.append({"id": sec["id"], "title": sec["title"], "layout": sec.get("layout"), "sources": [s["name"] for s in sec["sources"]], "articles": articles})
 
     CACHE.write_text(json.dumps(new_cache))
-    data = {"generated": datetime.now(timezone.utc).isoformat(), "sections": sections,
+    data = {"generated": datetime.now(timezone.utc).isoformat(), "sections": sections, "markets": markets,
             "health": [{"section": r[0], "source": r[1], "status": r[2], "count": r[3]} for r in report]}
     template = (ROOT / "template.html").read_text()
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)

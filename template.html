@@ -14,10 +14,12 @@
 :root {
   --bg: #f6f4ef; --panel: #ffffff; --ink: #1d1d1b; --muted: #6b6a66; --line: #e3dfd6;
   --accent: #b4441c; --indie: #2f6f5e; --chip: #efebe2; --new: #b4441c;
+  --up: #1a7f4b; --down: #c0362c;
 }
 @media (prefers-color-scheme: dark) {
   :root { --bg: #151514; --panel: #1e1e1c; --ink: #ecebe7; --muted: #9a988f; --line: #2f2e2b;
-          --accent: #e8794f; --indie: #6cc3a8; --chip: #2a2926; --new: #e8794f; }
+          --accent: #e8794f; --indie: #6cc3a8; --chip: #2a2926; --new: #e8794f;
+          --up: #4cc38a; --down: #f0705f; }
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--ink);
@@ -77,6 +79,23 @@ footer details summary { cursor: pointer; }
 footer table { border-collapse: collapse; margin-top: 8px; }
 footer td { padding: 2px 12px 2px 0; }
 .bad { color: var(--accent); }
+/* Markets: full-width band with the indicator board above a multi-column story list */
+section.wide { grid-column: 1 / -1; }
+.board { padding: 6px 16px 14px; border-bottom: 1px solid var(--line); display: grid; gap: 12px; }
+.board h3 { margin: 0 0 6px; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.tile { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px 6px; display: grid; gap: 1px; min-width: 0; }
+.tile .n { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile .p { font: 600 16px/1.2 -apple-system, sans-serif; font-variant-numeric: tabular-nums; }
+.tile .p small { font-size: 10.5px; color: var(--muted); font-weight: 400; margin-left: 3px; }
+.tile .c { font-size: 12.5px; font-variant-numeric: tabular-nums; font-weight: 600; }
+.up { color: var(--up); } .down { color: var(--down); } .flat { color: var(--muted); }
+.tile svg { width: 100%; height: 26px; display: block; margin-top: 2px; }
+.tile .w { font-size: 10.5px; color: var(--muted); display: flex; justify-content: space-between; gap: 4px; white-space: nowrap; }
+.tile.stale { opacity: .6; }
+section.wide ol { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+.more { display: block; width: calc(100% - 32px); margin: 4px 16px 14px; padding: 8px; border: 1px solid var(--line);
+        border-radius: 8px; background: var(--panel); color: var(--ink); font: inherit; font-size: 13px; cursor: pointer; }
 @media (max-width: 1000px) {
   .tabs { display: inline-flex; }
   main { grid-template-columns: 1fr; }
@@ -84,7 +103,11 @@ footer td { padding: 2px 12px 2px 0; }
   main section.active { display: block; }
 }
 @media (max-width: 600px) { header, main, footer { padding-left: 12px; padding-right: 12px; }
-  li { grid-template-columns: 84px minmax(0, 1fr); } .thumb { width: 84px; } }
+  li { grid-template-columns: 84px minmax(0, 1fr); } .thumb { width: 84px; }
+  .board { padding: 4px 12px 12px; }
+  .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .tile { padding: 6px 7px 5px; } .tile .p { font-size: 13.5px; } .tile .c { font-size: 11.5px; }
+  .tile .p small { display: none; } .tile svg { height: 20px; } }
 </style>
 </head>
 <body>
@@ -116,7 +139,7 @@ const store = {
   get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
 };
-const state = { q: "", kind: "all", hours: 48, tab: store.get("du.tab", DATA.sections[0].id),
+const state = { q: "", kind: "all", hours: 48, more: false, tab: store.get("du.tab", DATA.sections[0].id),
                 pick: new Set(store.get("du.pick2", [])), read: new Set(store.get("du.read", [])) };
 const lastVisit = store.get("du.lastVisit", null);
 store.set("du.lastVisit", DATA.generated);
@@ -140,6 +163,43 @@ function broken(img) {
     li.classList.remove("hero"); next.classList.add("hero"); li.before(next);
   }
 }
+// ---- market board
+const num = (v, d) => v.toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
+const digits = q => /=X$/.test(q.symbol) && Math.abs(q.price) < 10 ? 4 : 2;  // FX pairs get 4 decimals
+const CUR = { USX: "¢", USD: "USD", CAD: "CAD", EUR: "EUR", GBP: "GBP", GBp: "p", JPY: "JPY", HKD: "HKD", CNY: "CNY" };
+function spark(vals, cls) {
+  if (!vals || vals.length < 2) return "";
+  const lo = Math.min(...vals), hi = Math.max(...vals), span = hi - lo || 1;
+  const pts = vals.map((v, i) => `${(i / (vals.length - 1) * 100).toFixed(1)},${(24 - (v - lo) / span * 22 + 1).toFixed(1)}`).join(" ");
+  return `<svg viewBox="0 0 100 26" preserveAspectRatio="none" class="${cls}" aria-hidden="true">
+    <polyline points="${pts}" fill="none" stroke="currentColor" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>`;
+}
+function tile(q) {
+  const yieldPct = q.unit === "%";
+  const dir = !q.change ? "flat" : q.change > 0 ? "up" : "down";
+  const arrow = { up: "▲", down: "▼", flat: "•" }[dir];
+  const price = yieldPct ? num(q.price, 2) + "%" : num(q.price, digits(q));
+  const chg = q.change == null ? "–" : yieldPct
+    ? `${arrow} ${q.change > 0 ? "+" : ""}${Math.round(q.change * 100)} bp`
+    : `${arrow} ${q.pct > 0 ? "+" : ""}${num(q.pct, 2)}%`;
+  const when = q.time ? new Date(q.time) : null;
+  const sameDay = when && when.toDateString() === new Date().toDateString();
+  const asOf = when ? (sameDay ? when.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false })
+                               : when.toLocaleDateString([], { month: "short", day: "numeric" })) : "";
+  const mdir = q.month_pct == null ? "flat" : q.month_pct >= 0 ? "up" : "down";
+  const cur = yieldPct || /^\^|DX-Y/.test(q.symbol) || /=X$/.test(q.symbol) ? "" : (CUR[q.currency] ?? q.currency ?? "");
+  return `<div class="tile ${q.stale ? "stale" : ""}" title="${esc(q.symbol)}${q.stale ? " — last good quote (latest fetch failed)" : ""}">
+    <div class="n">${esc(q.name)}</div>
+    <div class="p">${price}${cur ? `<small>${esc(cur)}</small>` : ""}</div>
+    <div class="c ${dir}">${chg}</div>
+    ${spark(q.spark, mdir)}
+    <div class="w"><span>1 mo <b class="${mdir}">${q.month_pct == null ? "–" : (q.month_pct > 0 ? "+" : "") + num(q.month_pct, 1) + "%"}</b></span><span>${esc(asOf)}</span></div>
+  </div>`;
+}
+const board = () => (DATA.markets || []).length ? `<div class="board">${DATA.markets.map(g =>
+  `<div><h3>${esc(g.group)}</h3><div class="tiles">${g.items.map(tile).join("")}</div></div>`).join("")}</div>` : "";
+const WIDE_LIMIT = 12;
+
 const fmt = iso => new Date(iso).toLocaleString([], { weekday: "short", hour: "2-digit", minute: "2-digit" });
 
 function render() {
@@ -153,14 +213,16 @@ function render() {
       (!q || (a.title + " " + a.summary + " " + a.source).toLowerCase().includes(q)));
     const chips = `<span class="chip ${picked.length ? "" : "on"}" data-all="${sec.id}">All</span>` + sec.sources.map(s =>
       `<span class="chip ${state.pick.has(key(s)) ? "on" : ""}" data-src="${esc(key(s))}">${esc(s)}</span>`).join("");
+    const wide = sec.layout === "wide";
     // Lead with a story that has a picture, if one is near the top.
     const lead = list.slice(0, 3).findIndex(a => a.image);
-    if (lead > 0) list.unshift(...list.splice(lead, 1));
-    const items = list.map((a, n) => {
+    if (!wide && lead > 0) list.unshift(...list.splice(lead, 1));
+    const shown = wide && !state.more ? list.slice(0, WIDE_LIMIT) : list;
+    const items = shown.map((a, n) => {
       const isNew = lastVisit && a.date && a.date > lastVisit;
       const pic = a.image ? `<img src="${esc(a.image)}" alt="" loading="lazy" referrerpolicy="no-referrer"
           onerror="broken(this)">` : "";
-      return `<li class="${state.read.has(a.link) ? "read" : ""} ${n === 0 ? "hero" : ""}">
+      return `<li class="${state.read.has(a.link) ? "read" : ""} ${n === 0 && !wide ? "hero" : ""}">
         <a class="thumb ${a.image ? "" : "noimg"}" href="${esc(a.link)}" target="_blank" rel="noopener" tabindex="-1"
            data-i="${esc(initials(a.source))}" style="--ph:${hue(a.source)}">${pic}</a>
         <div class="body"><div class="src"><b class="${a.kind === "independent" ? "indie" : ""}">${esc(a.source)}</b>
@@ -169,10 +231,13 @@ function render() {
         ${a.summary && a.summary !== a.title ? `<div class="s">${esc(a.summary)}</div>` : ""}
       </div></li>`;
     }).join("");
-    return `<section id="sec-${sec.id}" class="${state.tab === sec.id ? "active" : ""}">
+    const more = wide && list.length > WIDE_LIMIT
+      ? `<button class="more">${state.more ? "Show fewer stories" : `Show all ${list.length} stories`}</button>` : "";
+    return `<section id="sec-${sec.id}" class="${state.tab === sec.id ? "active" : ""} ${wide ? "wide" : ""}">
       <h2>${esc(sec.title)} <small>${list.length} stories</small></h2>
+      ${wide ? board() : ""}
       <div class="chips">${chips}</div>
-      <ol>${items || '<div class="empty">Nothing matches.</div>'}</ol></section>`;
+      <ol>${items || '<div class="empty">Nothing matches.</div>'}</ol>${more}</section>`;
   }).join("");
   document.getElementById("tabs").innerHTML = DATA.sections.map(s =>
     `<button data-v="${s.id}" class="${state.tab === s.id ? "on" : ""}">${esc(s.title)}</button>`).join("");
@@ -197,6 +262,7 @@ for (const id of ["kind", "win", "tabs"]) {
   });
 }
 document.getElementById("main").addEventListener("click", e => {
+  if (e.target.closest(".more")) { state.more = !state.more; render(); return; }
   const c = e.target.closest(".chip");
   if (c) {
     if (c.dataset.all) DATA.sections.find(x => x.id === c.dataset.all).sources.forEach(s => state.pick.delete(c.dataset.all + "|" + s));
