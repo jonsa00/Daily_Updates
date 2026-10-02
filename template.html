@@ -74,6 +74,8 @@ li.read .t { color: var(--muted); }
 .t:hover { text-decoration: underline; }
 .s { color: var(--muted); font-size: 13.5px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .empty { padding: 20px 16px; color: var(--muted); }
+.hn { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.hn a { color: var(--indie); font-weight: 600; } .hn a:hover { text-decoration: underline; }
 footer { padding: 0 20px 30px; color: var(--muted); font-size: 12.5px; }
 footer details summary { cursor: pointer; }
 footer table { border-collapse: collapse; margin-top: 8px; }
@@ -231,6 +233,7 @@ function render() {
           <span>${ago(a.date)}</span>${isNew ? '<span class="badge">new</span>' : ""}</div>
         <a class="t" href="${esc(a.link)}" target="_blank" rel="noopener">${esc(a.title)}</a>
         ${a.summary && a.summary !== a.title ? `<div class="s">${esc(a.summary)}</div>` : ""}
+        ${a.discussion ? `<div class="hn">▲ ${a.points ?? 0} points · <a href="${esc(a.discussion)}" target="_blank" rel="noopener">${a.comments ?? 0} comments</a></div>` : ""}
       </div></li>`;
     }).join("");
     const more = wide && list.length > WIDE_LIMIT

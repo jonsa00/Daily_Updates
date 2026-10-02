@@ -118,6 +118,18 @@ def page_image(url):
     return ""
 
 
+def hn_extras(desc):
+    """Hacker News (hnrss) items carry points, comment count and discussion link instead of a summary."""
+    if "news.ycombinator.com/item" not in (desc or ""):
+        return {}
+    pts = re.search(r"Points:\s*(\d+)", desc)
+    num = re.search(r"# Comments:\s*(\d+)", desc)
+    url = re.search(r"Comments URL:.*?(https://news\.ycombinator\.com/item\?id=\d+)", desc, re.S)
+    text = re.split(r"(?:<p>)?(?:Article|Comments) URL:", desc)[0]  # Ask/Show HN posts have their own text first
+    return {"summary": clean(text), "points": int(pts.group(1)) if pts else None,
+            "comments": int(num.group(1)) if num else None, "discussion": url.group(1) if url else None}
+
+
 def parse_feed(raw):
     root = ET.fromstring(raw)
     items = []
@@ -132,6 +144,7 @@ def parse_feed(raw):
                 "summary": clean(desc),
                 "date": parse_date(text(it.find("pubDate")) or text(it.find("dc:date", NS))),
                 "image": first_image(it, desc, full),
+                **hn_extras(desc),
             })
     elif root.tag == "{%s}feed" % NS["atom"]:
         for e in root.findall("atom:entry", NS):
@@ -302,8 +315,8 @@ def build():
                     continue
                 seen.add(key)
                 articles.append({
-                    "title": i["title"], "link": i["link"], "image": i["image"],
-                    "summary": "" if i["summary"].startswith("Article URL:") else i["summary"],
+                    "title": i["title"], "link": i["link"], "image": i["image"], "summary": i["summary"],
+                    "points": i.get("points"), "comments": i.get("comments"), "discussion": i.get("discussion"),
                     "date": i["date"].isoformat() if i["date"] else None,
                     "source": src["name"], "kind": src.get("kind", "mainstream"),
                 })
