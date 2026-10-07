@@ -12,9 +12,11 @@ permissions:
   pages: write
   id-token: write
 
+# A newer build cancels any older one still queued or running, so a build that gets stuck on
+# GitHub's side (as one did waiting at the github-pages environment for 30h) can't block the rest.
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
