@@ -21,9 +21,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -54,9 +51,6 @@ jobs:
         with:
           path: site
 
-      - id: deploy
-        uses: actions/deploy-pages@v4
-
       # GitHub pauses scheduled workflows after 60 days without repo activity.
       - name: Keep schedule alive
         if: github.event_name == 'schedule'
@@ -68,3 +62,24 @@ jobs:
             git commit --allow-empty -m "Keep hourly schedule active"
             git push
           fi
+
+  # Publishing runs as its own job: deploy-pages called in the same job, a second after the upload,
+  # often found "0 artifacts" because GitHub hadn't registered the upload yet (64 failures, Nov 21-27).
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.retry.outputs.page_url || steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - name: Wait before retrying
+        if: steps.deploy.outcome == 'failure'
+        run: sleep 30
+
+      - id: retry
+        if: steps.deploy.outcome == 'failure'
+        uses: actions/deploy-pages@v4
